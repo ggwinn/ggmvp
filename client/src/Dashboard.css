@@ -36,34 +36,6 @@ body.dashboard-view {
   color: #2c3e50;
 }
 
-/* Dashboard Navigation */
-.dashboard-navigation {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.dashboard-navigation button {
-  background: #f0f0f0;
-  color: #333;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  margin: 0 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.2s ease;
-}
-
-.dashboard-navigation button:hover {
-  background: #e0e0e0;
-}
-
-.dashboard-navigation button.active {
-  background: #3498db;
-  color: white;
-}
-
 /* Search Section */
 .search-section {
   display: flex;
@@ -439,36 +411,8 @@ body.dashboard-view {
   .listing-form form {
     grid-template-columns: 1fr;
   }
-
+  
   .listing-form {
     padding: 20px;
   }
-}
-
-/* Dashboard Navigation */
-.dashboard-navigation {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.dashboard-navigation button {
-  background: #f0f0f0;
-  color: #333;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  margin: 0 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.2s ease;
-}
-
-.dashboard-navigation button:hover {
-  background: #e0e0e0;
-}
-
-.dashboard-navigation button.active {
-  background: #3498db;
-  color: white;
 }
