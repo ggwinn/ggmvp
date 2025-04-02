@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PostListingForm from './PostListingForm';
 import ListingDetailModal from './ListingDetailModal';
+import AboutUs from './AboutUs'; // Assuming you have this component
+import Community from './Community'; // Assuming you have this component
 import './Dashboard.css';
 
 function Dashboard({ name, email, onLogout }) {
@@ -12,6 +14,7 @@ function Dashboard({ name, email, onLogout }) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedListing, setSelectedListing] = useState(null);
+    const [currentView, setCurrentView] = useState('listings'); // Default to listings
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -72,7 +75,7 @@ function Dashboard({ name, email, onLogout }) {
                 console.error('Failed to load Square SDK');
             };
             document.body.appendChild(script);
-            
+
             return () => {
                 document.body.removeChild(script);
             };
@@ -124,9 +127,9 @@ function Dashboard({ name, email, onLogout }) {
         return (
             <div className="listings-grid">
                 {placeholders.map((item) => (
-                    <div 
-                        key={item.id} 
-                        className="listing-card" 
+                    <div
+                        key={item.id}
+                        className="listing-card"
                         onClick={() => handleListingClick(item)}
                     >
                         <img src={item.imageURL} alt={item.title} />
@@ -146,26 +149,52 @@ function Dashboard({ name, email, onLogout }) {
         <div className="dashboard">
             <h2>Welcome, {name}!</h2>
 
+            {/* Navigation Buttons */}
+            <div className="dashboard-navigation">
+                <button
+                    className={currentView === 'listings' ? 'active' : ''}
+                    onClick={() => setCurrentView('listings')}
+                >
+                    Listings
+                </button>
+                <button
+                    className={currentView === 'about' ? 'active' : ''}
+                    onClick={() => setCurrentView('about')}
+                >
+                    About Us
+                </button>
+                <button
+                    className={currentView === 'community' ? 'active' : ''}
+                    onClick={() => setCurrentView('community')}
+                >
+                    Community
+                </button>
+            </div>
+
             {/* Search Bar */}
             <div className="search-section">
-                <input
-                    type="text"
-                    placeholder="Search by title, size, type..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                {currentView === 'listings' && (
+                    <input
+                        type="text"
+                        placeholder="Search by title, size, type..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                )}
             </div>
 
             {/* Toggle Post Listing Form */}
-            <button className="post-listing-btn" onClick={() => setShowForm(!showForm)}>
-                {showForm ? "Cancel" : "Post a Listing"}
-            </button>
+            {currentView === 'listings' && (
+                <button className="post-listing-btn" onClick={() => setShowForm(!showForm)}>
+                    {showForm ? "Cancel" : "Post a Listing"}
+                </button>
+            )}
 
             {/* Show Post Listing Form */}
             {showForm && <PostListingForm email={email} onClose={() => setShowForm(false)} />}
 
-            {/* Listings Grid */}
-            {!showForm && (
+            {/* Conditional Rendering of Content */}
+            {currentView === 'listings' && (
                 <>
                     {isLoading ? (
                         <p className="status-message">Loading listings...</p>
@@ -177,14 +206,14 @@ function Dashboard({ name, email, onLogout }) {
                     ) : filteredResults.length > 0 ? (
                         <div className="listings-grid">
                             {filteredResults.map((listing) => (
-                                <div 
-                                    key={listing.id} 
+                                <div
+                                    key={listing.id}
                                     className="listing-card"
                                     onClick={() => handleListingClick(listing)}
                                 >
-                                    <img 
-                                        src={listing.imageURL || "https://via.placeholder.com/300x200?text=No+Image"} 
-                                        alt={listing.title} 
+                                    <img
+                                        src={listing.imageURL || "https://via.placeholder.com/300x200?text=No+Image"}
+                                        alt={listing.title}
                                     />
                                     <div className="listing-info">
                                         <h3>{listing.title}</h3>
@@ -206,9 +235,12 @@ function Dashboard({ name, email, onLogout }) {
                 </>
             )}
 
+            {currentView === 'about' && <AboutUs />}
+            {currentView === 'community' && <Community />}
+
             {/* Listing Detail Modal */}
             {selectedListing && (
-                <ListingDetailModal 
+                <ListingDetailModal
                     listing={selectedListing}
                     onClose={handleCloseModal}
                     userEmail={email}
