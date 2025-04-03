@@ -12,7 +12,7 @@ function Dashboard({ name, email, onLogout }) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedListing, setSelectedListing] = useState(null);
-    const [sortByPrice, setSortByPrice] = useState(null); // New state for sorting
+    const [sortByPrice, setSortByPrice] = useState(''); // State for dropdown value
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -160,18 +160,15 @@ function Dashboard({ name, email, onLogout }) {
                     />
                 </div>
                 <div className="sort-options">
-                    <button
-                        className={`sort-button ${sortByPrice === 'low' ? 'active' : ''}`}
-                        onClick={() => setSortByPrice(sortByPrice === 'low' ? null : 'low')}
+                    <select
+                        className="sort-dropdown"
+                        value={sortByPrice}
+                        onChange={(e) => setSortByPrice(e.target.value)}
                     >
-                        Price: Low to High
-                    </button>
-                    <button
-                        className={`sort-button ${sortByPrice === 'high' ? 'active' : ''}`}
-                        onClick={() => setSortByPrice(sortByPrice === 'high' ? null : 'high')}
-                    >
-                        Price: High to Low
-                    </button>
+                        <option value="">Sort by Price</option>
+                        <option value="low">Price: Low to High</option>
+                        <option value="high">Price: High to Low</option>
+                    </select>
                 </div>
             </div>
 

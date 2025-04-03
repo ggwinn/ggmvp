@@ -70,29 +70,24 @@ body.dashboard-view {
 /* Sort Options */
 .sort-options {
     display: flex;
-    gap: 10px;
+    align-items: center;
 }
 
-/* Sort Button */
-.sort-button {
-    background: #eee;
-    color: #333;
+/* Sort Dropdown */
+.sort-dropdown {
+    padding: 12px 15px;
     border: 1px solid #ccc;
-    padding: 10px 15px;
     border-radius: 5px;
     font-size: 14px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: border-color 0.2s ease;
+    width: 180px; /* Adjust width as needed */
 }
 
-.sort-button:hover {
-    background: #ddd;
-}
-
-.sort-button.active {
-    background: #3498db;
-    color: white;
+.sort-dropdown:focus {
     border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
 }
 
 /* Action Buttons */
