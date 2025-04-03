@@ -18,6 +18,7 @@ function PostListingForm({ email, onClose }) {
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewUrl, setPreviewUrl] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState(''); // New state for phone number
 
     // Calculate total price when relevant inputs change
     useEffect(() => {
@@ -28,7 +29,7 @@ function PostListingForm({ email, onClose }) {
             setTotalPrice(0);
         }
     }, [startDate, endDate, pricePerDay]);
-    
+
     // Reset message after 5 seconds
     useEffect(() => {
         if (message) {
@@ -62,13 +63,13 @@ function PostListingForm({ email, onClose }) {
             setIsSubmitting(false);
             return;
         }
-        
+
         if (!image) {
             setMessage('Please upload an image of your item');
             setIsSubmitting(false);
             return;
         }
-        
+
         if (!pricePerDay || isNaN(parseFloat(pricePerDay)) || parseFloat(pricePerDay) <= 0) {
             setMessage('Please enter a valid price per day');
             setIsSubmitting(false);
@@ -85,6 +86,7 @@ function PostListingForm({ email, onClose }) {
         formData.append('endDate', endDate.toISOString());
         formData.append('pricePerDay', pricePerDay);
         formData.append('totalPrice', totalPrice);
+        formData.append('phoneNumber', phoneNumber); // Include phone number
         if (image) formData.append('image', image);
 
         try {
@@ -102,7 +104,7 @@ function PostListingForm({ email, onClose }) {
             setTotalPrice(0);
             setImage(null);
             setPreviewUrl('');
-            
+            setPhoneNumber(''); // Reset phone number
             // Close form after delay
             setTimeout(() => {
                 onClose();
@@ -117,15 +119,15 @@ function PostListingForm({ email, onClose }) {
     return (
         <div className="listing-form">
             <h3>Post a Clothing Listing</h3>
-            
+
             <form onSubmit={handlePostListing}>
                 <label>Title</label>
-                <input 
-                    type="text" 
-                    value={title} 
-                    onChange={(e) => setTitle(e.target.value)} 
+                <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     placeholder="E.g., Black Formal Dress"
-                    required 
+                    required
                 />
 
                 <label>Size</label>
@@ -163,65 +165,74 @@ function PostListingForm({ email, onClose }) {
                 </select>
 
                 <label>Wash Instructions</label>
-                <input 
-                    type="text" 
-                    value={washInstructions} 
-                    onChange={(e) => setWashInstructions(e.target.value)} 
+                <input
+                    type="text"
+                    value={washInstructions}
+                    onChange={(e) => setWashInstructions(e.target.value)}
                     placeholder="E.g., Machine wash cold"
-                    required 
+                    required
                 />
 
                 <label>Available From</label>
-                <DatePicker 
-                    selected={startDate} 
-                    onChange={(date) => setStartDate(date)} 
-                    selectsStart 
-                    startDate={startDate} 
-                    endDate={endDate} 
+                <DatePicker
+                    selected={startDate}
+                    onChange={(date) => setStartDate(date)}
+                    selectsStart
+                    startDate={startDate}
+                    endDate={endDate}
                     minDate={new Date()}
                     placeholderText="Select start date"
                     className="date-input"
                 />
 
                 <label>Available Until</label>
-                <DatePicker 
-                    selected={endDate} 
-                    onChange={(date) => setEndDate(date)} 
-                    selectsEnd 
-                    startDate={startDate} 
-                    endDate={endDate} 
+                <DatePicker
+                    selected={endDate}
+                    onChange={(date) => setEndDate(date)}
+                    selectsEnd
+                    startDate={startDate}
+                    endDate={endDate}
                     minDate={startDate || new Date()}
                     placeholderText="Select end date"
                     className="date-input"
                 />
 
                 <label>Price per day ($)</label>
-                <input 
-                    type="number" 
-                    value={pricePerDay} 
-                    onChange={(e) => setPricePerDay(e.target.value)} 
-                    min="0.01" 
+                <input
+                    type="number"
+                    value={pricePerDay}
+                    onChange={(e) => setPricePerDay(e.target.value)}
+                    min="0.01"
                     step="0.01"
                     placeholder="E.g., 4.99"
-                    required 
+                    required
                 />
 
                 {totalPrice > 0 && (
                     <p className="total-price">
-                        Total Price for {Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1} days: 
+                        Total Price for {Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1} days:
                         <span>${totalPrice.toFixed(2)}</span>
                     </p>
                 )}
 
+                <label>Phone Number</label>
+                <input
+                    type="tel" // Use type="tel" for phone numbers
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="E.g., 123-456-7890"
+                    required // You can make this optional if you prefer
+                />
+
                 <label>Upload Image</label>
                 <div className="file-upload-container">
-                    <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={(e) => setImage(e.target.files[0])} 
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setImage(e.target.files[0])}
                         className="file-input"
                     />
-                    
+
                     {previewUrl && (
                         <div className="image-preview">
                             <img src={previewUrl} alt="Preview" />
@@ -229,15 +240,15 @@ function PostListingForm({ email, onClose }) {
                     )}
                 </div>
 
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     disabled={isSubmitting}
                     className={isSubmitting ? "submitting" : ""}
                 >
                     {isSubmitting ? "Posting..." : "Post Listing"}
                 </button>
             </form>
-            
+
             {message && (
                 <div className={`message ${message.startsWith('❌') ? 'error' : 'success'}`}>
                     {message}
