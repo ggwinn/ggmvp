@@ -1,31 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Dashboard from './Dashboard';
-import AboutUs from './AboutUs'; // Import the new component
-import Community from './Community'; // Import the new component
-import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom'; // Import routing components
 import './App.css';
 
 function App() {
     // ==========================================
     // STATE MANAGEMENT
     // ==========================================
-
+    
+    // Original input state variables
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
+    
+    // Application flow state
     const [message, setMessage] = useState('');
     const [isEmailSent, setIsEmailSent] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
-    const [authMode, setAuthMode] = useState('login'); // Options: 'register' or 'login'
-
-    // Load Square SDK (remains the same)
+    
+    // Authentication mode state
+    const [authMode, setAuthMode] = useState('register'); // Options: 'register' or 'login'
+    
+    // Load Square SDK
     useEffect(() => {
         // Only load if not already loaded
         if (!window.Square) {
             const squareScript = document.createElement('script');
-            squareScript.src = process.env.NODE_ENV === 'production'
+            squareScript.src = process.env.NODE_ENV === 'production' 
                 ? 'https://web.squarecdn.com/v1/square.js'
                 : 'https://sandbox.web.squarecdn.com/v1/square.js';
             squareScript.async = true;
@@ -36,7 +38,7 @@ function App() {
                 console.error('Failed to load Square SDK');
             };
             document.head.appendChild(squareScript);
-
+            
             return () => {
                 // Clean up on component unmount
                 if (document.head.contains(squareScript)) {
@@ -45,25 +47,25 @@ function App() {
             };
         }
     }, []);
-
-    // Add body class for dashboard view when verified (remains the same)
+    
+    // Add body class for dashboard view when verified
     useEffect(() => {
         if (isVerified) {
             document.body.classList.add('dashboard-view');
         } else {
             document.body.classList.remove('dashboard-view');
         }
-
+        
         // Cleanup on component unmount
         return () => {
             document.body.classList.remove('dashboard-view');
         };
     }, [isVerified]);
-
+    
     // ==========================================
     // EVENT HANDLERS
     // ==========================================
-
+    
     const handleRegister = async (e) => {
         e.preventDefault();
 
@@ -86,15 +88,15 @@ function App() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
+        
         try {
             const response = await axios.post('/login', { email, password });
             console.log("Login API response:", response);
-
+            
             if (response.data.success) {
                 setName(response.data.name || 'User'); // Use name from response or default to 'User'
                 setMessage('Login successful!');
-                setIsVerified(true);
+                setIsVerified(true); 
             } else {
                 setMessage(response.data.message || 'Login failed. Please check your credentials.');
             }
@@ -107,7 +109,7 @@ function App() {
         try {
             const response = await axios.post('/verify', { email, verificationCode });
             setMessage(response.data.message || 'Email verified successfully!');
-
+            
             if (response.data.success) {
                 setIsVerified(true); // Show dashboard
             }
@@ -131,7 +133,7 @@ function App() {
     // ==========================================
     // COMPONENT RENDERING FUNCTIONS
     // ==========================================
-
+    
     const renderLoginForm = () => (
         <form onSubmit={handleLogin}>
             <div>
@@ -210,62 +212,44 @@ function App() {
     // MAIN RENDER FUNCTION
     // ==========================================
     return (
-        <Router>
-            <div className={`App ${isVerified ? 'dashboard-mode' : ''}`}>
-                {!isVerified ? (
-                    <>
-                        <h1>Welcome to Campus Closet</h1>
-
-                        {isEmailSent ? (
-                            renderVerificationForm()
-                        ) : (
-                            <>
-                                <div className="auth-tabs">
-                                    <button
-                                        className={`tab-btn ${authMode === 'register' ? 'active' : ''}`}
-                                        onClick={() => setAuthMode('register')}
-                                    >
-                                        Register
-                                    </button>
-                                    <button
-                                        className={`tab-btn ${authMode === 'login' ? 'active' : ''}`}
-                                        onClick={() => setAuthMode('login')}
-                                    >
-                                        Login
-                                    </button>
-                                </div>
-
-                                {authMode === 'register' ? renderRegistrationForm() : renderLoginForm()}
-                            </>
-                        )}
-
-                        {message && <p className="message">{message}</p>}
-                    </>
-                ) : (
-                    <>
-                        <nav>
-                            <ul className="main-nav">
-                                <li>
-                                    <Link to="/">Listings</Link>
-                                </li>
-                                <li>
-                                    <Link to="/about">About Us</Link>
-                                </li>
-                                <li>
-                                    <Link to="/community">Vendors Community</Link>
-                                </li>
-                            </ul>
-                        </nav>
-
-                        <Routes>
-                            <Route path="/" element={<Dashboard name={name} email={email} onLogout={handleLogout} />} />
-                            <Route path="/about" element={<AboutUs />} />
-                            <Route path="/community" element={<Community />} />
-                        </Routes>
-                    </>
-                )}
-            </div>
-        </Router>
+        <div className={`App ${isVerified ? 'dashboard-mode' : ''}`}>
+            {!isVerified ? (
+                <>
+                    <h1>Welcome to Campus Closet</h1>
+                    
+                    {isEmailSent ? (
+                        renderVerificationForm()
+                    ) : (
+                        <>
+                            <div className="auth-tabs">
+                                <button 
+                                    className={`tab-btn ${authMode === 'register' ? 'active' : ''}`}
+                                    onClick={() => setAuthMode('register')}
+                                >
+                                    Register
+                                </button>
+                                <button 
+                                    className={`tab-btn ${authMode === 'login' ? 'active' : ''}`}
+                                    onClick={() => setAuthMode('login')}
+                                >
+                                    Login
+                                </button>
+                            </div>
+                            
+                            {authMode === 'register' ? renderRegistrationForm() : renderLoginForm()}
+                        </>
+                    )}
+                    
+                    {message && <p className="message">{message}</p>}
+                </>
+            ) : (
+                <Dashboard 
+                    name={name} 
+                    email={email} 
+                    onLogout={handleLogout} 
+                />
+            )}
+        </div>
     );
 }
 
