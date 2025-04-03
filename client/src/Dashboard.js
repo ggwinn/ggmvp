@@ -13,6 +13,7 @@ function Dashboard({ name, email, onLogout }) {
     const [error, setError] = useState('');
     const [selectedListing, setSelectedListing] = useState(null);
     const [sortByPrice, setSortByPrice] = useState('default'); // 'default', 'low_high', 'high_low'
+    const [activeSection, setActiveSection] = useState('listings'); // 'listings', 'about', 'community'
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -157,78 +158,120 @@ function Dashboard({ name, email, onLogout }) {
         <div className="dashboard">
             <h2>Welcome, {name}!</h2>
 
-            {/* Search and Sort Section */}
-            <div className="search-sort-section">
-                <div className="search-section">
-                    <input
-                        type="text"
-                        placeholder="Search by title, size, type..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                <div className="sort-section">
-                    <label htmlFor="sortPrice">Sort by Price:</label>
-                    <select id="sortPrice" value={sortByPrice} onChange={handleSortChange}>
-                        <option value="default">Default</option>
-                        <option value="low_high">Low to High</option>
-                        <option value="high_low">High to Low</option>
-                    </select>
-                </div>
-            </div>
+            {/* Navigation Tabs within Dashboard */}
+            <nav className="dashboard-nav">
+                <button
+                    className={activeSection === 'listings' ? 'active' : ''}
+                    onClick={() => setActiveSection('listings')}
+                >
+                    Listings
+                </button>
+                <button
+                    className={activeSection === 'about' ? 'active' : ''}
+                    onClick={() => setActiveSection('about')}
+                >
+                    About Us
+                </button>
+                <button
+                    className={activeSection === 'community' ? 'active' : ''}
+                    onClick={() => setActiveSection('community')}
+                >
+                    Vendors Community
+                </button>
+            </nav>
 
-            {/* Toggle Post Listing Form */}
-            <button className="post-listing-btn" onClick={() => setShowForm(!showForm)}>
-                {showForm ? "Cancel" : "Post a Listing"}
-            </button>
-
-            {/* Show Post Listing Form */}
-            {showForm && <PostListingForm email={email} onClose={() => setShowForm(false)} />}
-
-            {isLoading ? (
-                <p className="status-message">Loading listings...</p>
-            ) : error ? (
-                <div className="error-container">
-                    <p className="error-message">{error}</p>
-                    {renderPlaceholderContent()}
-                </div>
-            ) : filteredResults.length > 0 ? (
-                <div className="listings-grid">
-                    {filteredResults.map((listing) => (
-                        <div
-                            key={listing.id}
-                            className="listing-card"
-                            onClick={() => handleListingClick(listing)}
-                        >
-                            <img
-                                src={listing.imageURL || "https://via.placeholder.com/300x200?text=No+Image"}
-                                alt={listing.title}
+            {activeSection === 'listings' && (
+                <section className="listings-section">
+                    {/* Search and Sort Section */}
+                    <div className="search-sort-section">
+                        <div className="search-section">
+                            <input
+                                type="text"
+                                placeholder="Search by title, size, type..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                             />
-                            <div className="listing-info">
-                                <h3>{listing.title}</h3>
-                                <p><strong>Size:</strong> {listing.size}</p>
-                                <p><strong>Type:</strong> {listing.itemType}</p>
-                                <p><strong>${listing.pricePerDay}/day</strong></p>
-                            </div>
                         </div>
-                    ))}
-                </div>
-            ) : searchQuery ? (
-                <p className="status-message">No items matching "{searchQuery}" found.</p>
-            ) : (
-                <div>
-                    <p className="status-message">No listings available. Be the first to post!</p>
-                    {renderPlaceholderContent()}
-                </div>
+                        <div className="sort-section">
+                            <label htmlFor="sortPrice">Sort by Price:</label>
+                            <select id="sortPrice" value={sortByPrice} onChange={handleSortChange}>
+                                <option value="default">Default</option>
+                                <option value="low_high">Low to High</option>
+                                <option value="high_low">High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Toggle Post Listing Form */}
+                    <button className="post-listing-btn" onClick={() => setShowForm(!showForm)}>
+                        {showForm ? "Cancel" : "Post a Listing"}
+                    </button>
+
+                    {/* Show Post Listing Form */}
+                    {showForm && <PostListingForm email={email} onClose={() => setShowForm(false)} />}
+
+                    {isLoading ? (
+                        <p className="status-message">Loading listings...</p>
+                    ) : error ? (
+                        <div className="error-container">
+                            <p className="error-message">{error}</p>
+                            {renderPlaceholderContent()}
+                        </div>
+                    ) : filteredResults.length > 0 ? (
+                        <div className="listings-grid">
+                            {filteredResults.map((listing) => (
+                                <div
+                                    key={listing.id}
+                                    className="listing-card"
+                                    onClick={() => handleListingClick(listing)}
+                                >
+                                    <img
+                                        src={listing.imageURL || "https://via.placeholder.com/300x200?text=No+Image"}
+                                        alt={listing.title}
+                                    />
+                                    <div className="listing-info">
+                                        <h3>{listing.title}</h3>
+                                        <p><strong>Size:</strong> {listing.size}</p>
+                                        <p><strong>Type:</strong> {listing.itemType}</p>
+                                        <p><strong>${listing.pricePerDay}/day</strong></p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : searchQuery ? (
+                        <p className="status-message">No items matching "{searchQuery}" found.</p>
+                    ) : (
+                        <div>
+                            <p className="status-message">No listings available. Be the first to post!</p>
+                            {renderPlaceholderContent()}
+                        </div>
+                    )}
+
+                    {/* Listing Detail Modal */}
+                    {selectedListing && (
+                        <ListingDetailModal
+                            listing={selectedListing}
+                            onClose={handleCloseModal}
+                            userEmail={email}
+                        />
+                    )}
+                </section>
             )}
 
-            {/* Listing Detail Modal */}
-            {selectedListing && (
-                <ListingDetailModal
-                    listing={selectedListing}
-                    onClose={handleCloseModal}
-                    userEmail={email}
-                />
+            {activeSection === 'about' && (
+                <section className="about-us-section">
+                    <h2>About Us</h2>
+                    <p>This is the content for the About Us page within the dashboard.</p>
+                    {/* Add your About Us information here */}
+                </section>
+            )}
+
+            {activeSection === 'community' && (
+                <section className="community-section">
+                    <h2>Vendors Community</h2>
+                    <p>This is the content for the Vendors Community page within the dashboard.</p>
+                    {/* Add your Vendors Community information here */}
+                </section>
             )}
 
             {/* Logout Button */}
