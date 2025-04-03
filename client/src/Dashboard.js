@@ -12,6 +12,7 @@ function Dashboard({ name, email, onLogout }) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedListing, setSelectedListing] = useState(null);
+    const [sortByPrice, setSortByPrice] = useState('default'); // 'default', 'low_high', 'high_low'
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -19,7 +20,6 @@ function Dashboard({ name, email, onLogout }) {
             try {
                 const response = await axios.get('/search?query=');
                 setListings(response.data.listings || []);
-                setFilteredResults(response.data.listings || []);
                 setError('');
             } catch (error) {
                 console.error('Error fetching listings:', error);
@@ -31,22 +31,33 @@ function Dashboard({ name, email, onLogout }) {
         fetchListings();
     }, []);
 
-    // Handle search
+    // Handle search and sorting
     useEffect(() => {
-        if (!searchQuery.trim()) {
-            setFilteredResults(listings);
-            return;
+        let results = [...listings];
+
+        // Apply search filter
+        if (searchQuery.trim()) {
+            results = listings.filter(listing =>
+                listing.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                listing.size?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                listing.itemType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                listing.condition?.toLowerCase().includes(searchQuery.toLowerCase())
+            );
         }
 
-        const filtered = listings.filter(listing =>
-            listing.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            listing.size?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            listing.itemType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            listing.condition?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        // Apply sorting
+        if (sortByPrice === 'low_high') {
+            results.sort((a, b) => parseFloat(a.pricePerDay) - parseFloat(b.pricePerDay));
+        } else if (sortByPrice === 'high_low') {
+            results.sort((a, b) => parseFloat(b.pricePerDay) - parseFloat(a.pricePerDay));
+        }
 
-        setFilteredResults(filtered);
-    }, [searchQuery, listings]);
+        setFilteredResults(results);
+    }, [searchQuery, listings, sortByPrice]);
+
+    const handleSortChange = (event) => {
+        setSortByPrice(event.target.value);
+    };
 
     // Function to handle clicking on a listing
     const handleListingClick = (listing) => {
@@ -146,14 +157,24 @@ function Dashboard({ name, email, onLogout }) {
         <div className="dashboard">
             <h2>Welcome, {name}!</h2>
 
-            {/* Search Bar */}
-            <div className="search-section">
-                <input
-                    type="text"
-                    placeholder="Search by title, size, type..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            {/* Search and Sort Section */}
+            <div className="search-sort-section">
+                <div className="search-section">
+                    <input
+                        type="text"
+                        placeholder="Search by title, size, type..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+                <div className="sort-section">
+                    <label htmlFor="sortPrice">Sort by Price:</label>
+                    <select id="sortPrice" value={sortByPrice} onChange={handleSortChange}>
+                        <option value="default">Default</option>
+                        <option value="low_high">Low to High</option>
+                        <option value="high_low">High to Low</option>
+                    </select>
+                </div>
             </div>
 
             {/* Toggle Post Listing Form */}

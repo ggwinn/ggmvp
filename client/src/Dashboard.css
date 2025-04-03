@@ -36,15 +36,21 @@ body.dashboard-view {
   color: #2c3e50;
 }
 
-/* Search Section */
-.search-section {
+/* Search and Sort Section */
+.search-sort-section {
   display: flex;
+  gap: 20px;
+  align-items: center;
   justify-content: center;
   margin-bottom: 30px;
-  position: relative;
-  max-width: 600px;
+  max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.search-section {
+  flex-grow: 1; /* Allow search to take more space */
+  position: relative;
 }
 
 .search-section input {
@@ -61,6 +67,30 @@ body.dashboard-view {
   border-color: #3498db;
   outline: none;
   box-shadow: 0 2px 15px rgba(52, 152, 219, 0.15);
+}
+
+.sort-section {
+  display: flex;
+  align-items: center;
+}
+
+.sort-section label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.sort-section select {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.sort-section select:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.15);
 }
 
 /* Action Buttons */
@@ -411,8 +441,21 @@ body.dashboard-view {
   .listing-form form {
     grid-template-columns: 1fr;
   }
-  
+
   .listing-form {
     padding: 20px;
+  }
+}
+
+/* Media queries for search and sort section */
+@media (max-width: 768px) {
+  .search-sort-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .sort-section {
+    text-align: left;
   }
 }
