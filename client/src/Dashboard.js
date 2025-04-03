@@ -12,7 +12,7 @@ function Dashboard({ name, email, onLogout }) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedListing, setSelectedListing] = useState(null);
-    const [sortByPrice, setSortByPrice] = useState('default'); // 'default', 'low_high', 'high_low'
+    const [sortByPrice, setSortByPrice] = useState(null); // New state for sorting
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -31,11 +31,20 @@ function Dashboard({ name, email, onLogout }) {
         fetchListings();
     }, []);
 
-    // Handle search and sorting
-    useEffect(() => {
-        let results = [...listings];
+    // Function to sort listings by price
+    const sortListingsByPrice = (list) => {
+        if (sortByPrice === 'low') {
+            return [...list].sort((a, b) => a.pricePerDay - b.pricePerDay);
+        } else if (sortByPrice === 'high') {
+            return [...list].sort((a, b) => b.pricePerDay - a.pricePerDay);
+        }
+        return list;
+    };
 
-        // Apply search filter
+    // Handle search and sort
+    useEffect(() => {
+        let results = listings;
+
         if (searchQuery.trim()) {
             results = listings.filter(listing =>
                 listing.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -45,33 +54,18 @@ function Dashboard({ name, email, onLogout }) {
             );
         }
 
-        // Apply sorting
-        if (sortByPrice === 'low_high') {
-            results.sort((a, b) => parseFloat(a.pricePerDay) - parseFloat(b.pricePerDay));
-        } else if (sortByPrice === 'high_low') {
-            results.sort((a, b) => parseFloat(b.pricePerDay) - parseFloat(a.pricePerDay));
-        }
-
-        setFilteredResults(results);
+        setFilteredResults(sortListingsByPrice(results));
     }, [searchQuery, listings, sortByPrice]);
 
-    const handleSortChange = (event) => {
-        setSortByPrice(event.target.value);
-    };
-
-    // Function to handle clicking on a listing
     const handleListingClick = (listing) => {
         setSelectedListing(listing);
     };
 
-    // Function to close the modal
     const handleCloseModal = () => {
         setSelectedListing(null);
     };
 
-    // Load Square SDK when the component mounts
     useEffect(() => {
-        // Only load if not already loaded
         if (!window.Square) {
             const script = document.createElement('script');
             script.src = 'https://sandbox.web.squarecdn.com/v1/square.js';
@@ -90,9 +84,7 @@ function Dashboard({ name, email, onLogout }) {
         }
     }, []);
 
-    // Function to render placeholder content when no listings are available
     const renderPlaceholderContent = () => {
-        // Sample placeholder data for visual testing
         const placeholders = [
             {
                 id: 'placeholder-1',
@@ -167,62 +159,67 @@ function Dashboard({ name, email, onLogout }) {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="sort-section">
-                    <label htmlFor="sortPrice">Sort by Price:</label>
-                    <select id="sortPrice" value={sortByPrice} onChange={handleSortChange}>
-                        <option value="default">Default</option>
-                        <option value="low_high">Low to High</option>
-                        <option value="high_low">High to Low</option>
-                    </select>
+                <div className="sort-options">
+                    <button
+                        className={`sort-button ${sortByPrice === 'low' ? 'active' : ''}`}
+                        onClick={() => setSortByPrice(sortByPrice === 'low' ? null : 'low')}
+                    >
+                        Price: Low to High
+                    </button>
+                    <button
+                        className={`sort-button ${sortByPrice === 'high' ? 'active' : ''}`}
+                        onClick={() => setSortByPrice(sortByPrice === 'high' ? null : 'high')}
+                    >
+                        Price: High to Low
+                    </button>
                 </div>
             </div>
 
-            {/* Toggle Post Listing Form */}
             <button className="post-listing-btn" onClick={() => setShowForm(!showForm)}>
                 {showForm ? "Cancel" : "Post a Listing"}
             </button>
 
-            {/* Show Post Listing Form */}
-            {showForm && <PostListingForm email={email} onClose={() => setShowForm(false)} />}
-
-            {isLoading ? (
-                <p className="status-message">Loading listings...</p>
-            ) : error ? (
-                <div className="error-container">
-                    <p className="error-message">{error}</p>
-                    {renderPlaceholderContent()}
-                </div>
-            ) : filteredResults.length > 0 ? (
-                <div className="listings-grid">
-                    {filteredResults.map((listing) => (
-                        <div
-                            key={listing.id}
-                            className="listing-card"
-                            onClick={() => handleListingClick(listing)}
-                        >
-                            <img
-                                src={listing.imageURL || "https://via.placeholder.com/300x200?text=No+Image"}
-                                alt={listing.title}
-                            />
-                            <div className="listing-info">
-                                <h3>{listing.title}</h3>
-                                <p><strong>Size:</strong> {listing.size}</p>
-                                <p><strong>Type:</strong> {listing.itemType}</p>
-                                <p><strong>${listing.pricePerDay}/day</strong></p>
-                            </div>
+            {!showForm && (
+                <>
+                    {isLoading ? (
+                        <p className="status-message">Loading listings...</p>
+                    ) : error ? (
+                        <div className="error-container">
+                            <p className="error-message">{error}</p>
+                            {renderPlaceholderContent()}
                         </div>
-                    ))}
-                </div>
-            ) : searchQuery ? (
-                <p className="status-message">No items matching "{searchQuery}" found.</p>
-            ) : (
-                <div>
-                    <p className="status-message">No listings available. Be the first to post!</p>
-                    {renderPlaceholderContent()}
-                </div>
+                    ) : filteredResults.length > 0 ? (
+                        <div className="listings-grid">
+                            {filteredResults.map((listing) => (
+                                <div
+                                    key={listing.id}
+                                    className="listing-card"
+                                    onClick={() => handleListingClick(listing)}
+                                >
+                                    <img
+                                        src={listing.imageURL || "https://via.placeholder.com/300x200?text=No+Image"}
+                                        alt={listing.title}
+                                    />
+                                    <div className="listing-info">
+                                        <h3>{listing.title}</h3>
+                                        <p><strong>Size:</strong> {listing.size}</p>
+                                        <p><strong>Type:</strong> {listing.itemType}</p>
+                                        <p><strong>${listing.pricePerDay}/day</strong></p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : searchQuery ? (
+                        <p className="status-message">No items matching "{searchQuery}" found.</p>
+                    ) : (
+                        <div>
+                            <p className="status-message">No listings available. Be the first to post!</p>
+                            {renderPlaceholderContent()}
+                        </div>
+                    )}
+                </>
             )}
 
-            {/* Listing Detail Modal */}
             {selectedListing && (
                 <ListingDetailModal
                     listing={selectedListing}
@@ -231,7 +228,6 @@ function Dashboard({ name, email, onLogout }) {
                 />
             )}
 
-            {/* Logout Button */}
             <button className="logout-btn" onClick={onLogout}>Log Out</button>
         </div>
     );
